@@ -1,0 +1,39 @@
+# 🌽 Corn Leaf Disease Detection Dataset - YOLO Format
+
+This dataset is designed for **Corn Leaf Disease Detection** using **YOLOv8**. It contains **4,924 images** of corn leaves, annotated with **bounding boxes** for disease classification.
+
+🔗 **Dataset Link:** [Corn Leaf Disease Dataset](https://universe.roboflow.com/corn-leaf-disease/corn_disease-vsprz/dataset/4)  
+
+---
+
+## 📂 Dataset Structure  
+
+- **Total Images:** 4,924  
+- **Annotation Format:** YOLO (Bounding Box Annotations)  
+- **Classes:** 7 disease categories + healthy leaves  
+
+### 🔹 Dataset Split  
+| Split      | Percentage | Images |
+|------------|-----------|--------|
+| **Train**  | 90%       | 4,425  |
+| **Validation** | 7%    | 332    |
+| **Test**   | 3%        | 167    |
+
+---
+
+## 🏷️ Classes & Labels  
+The dataset includes the following **7 disease types** + **healthy class**:
+
+| Class ID | Class Name     |
+|----------|---------------|
+| 0        | Brown Spot    |
+| 1        | Corn Rust     |
+| 2        | Corn Smut     |
+| 3        | Downy Mildew  |
+| 4        | Grey Leaf Spot |
+| 5        | Healthy       |
+| 6        | Leaf Blight   |
+
+---
+
+
