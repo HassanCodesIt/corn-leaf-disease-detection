@@ -21,6 +21,8 @@ Detect and classify corn leaf diseases in real-time using **YOLOv8n**—identify
 * **`corn_Leaf_model.pt`** – Trained YOLOv8n model weights ready for inference.
 * **`test_model_with_image.py`** – Script to detect diseases on a static image: loads model, runs detection, displays, and saves annotated image.
 * **`test_model_with_webcam.py`** – Real-time webcam inference demo.
+* **`app/`** – FastAPI web application for corn leaf disease detection.
+* **`static/`** – JavaScript frontend for uploading images via the browser.
 
 ---
 
@@ -30,6 +32,7 @@ Detect and classify corn leaf diseases in real-time using **YOLOv8n**—identify
 * Quick and lightweight via YOLOv8n for real-time use.
 * Full training pipeline included: from data download to model tuning.
 * Inference scripts streamline testing on images or webcams.
+* **Web application** with FastAPI backend and JavaScript frontend for easy image uploads.
 
 ---
 
@@ -79,6 +82,44 @@ python test_model_with_image.py
 ```bash
 python test_model_with_webcam.py  
 ```
+
+### 7. Web Application
+
+Run the FastAPI web application:
+
+```bash
+pip install -r requirements.txt
+uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
+
+Then open your browser and navigate to `http://localhost:8000` to use the web interface.
+
+---
+
+## 🌐 Web Application
+
+The project includes a modern web application built with **FastAPI** (backend) and **JavaScript** (frontend) that allows users to upload corn leaf images directly through their browser.
+
+### Screenshot
+
+![Corn Leaf Disease Detection Web App](https://github.com/user-attachments/assets/49477b2c-9ed4-46ef-b4ce-652349a18663)
+
+### Features
+
+* **Drag & Drop** – Simply drag and drop your corn leaf images onto the upload area.
+* **Click to Browse** – Or click the button to select images from your device.
+* **Real-time Detection** – Get instant disease detection results with confidence scores.
+* **Annotated Images** – View the original image alongside the annotated detection result.
+* **Disease Legend** – Easy-to-understand color-coded legend for all detectable diseases.
+
+### API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/` | GET | Serves the web frontend |
+| `/health` | GET | Health check endpoint |
+| `/predict` | POST | Returns JSON predictions for uploaded image |
+| `/predict/annotated` | POST | Returns annotated image with bounding boxes |
 
 ---
 
