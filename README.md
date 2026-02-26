@@ -145,6 +145,23 @@ YOLOv8n offers a compact model ideal for real-time applications. Your setup supp
 
 ---
 
+## ☁️ Deploy to Render
+
+This application is ready for deployment on [Render](https://render.com).
+
+### One-Click Deploy
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy)
+
+### Manual Deployment
+
+1. Create a new **Web Service** on Render
+2. Connect your GitHub repository
+3. Render will automatically detect the `render.yaml` configuration
+4. The app will be deployed and available at your Render URL
+
+---
+
 ## 🚀 Next Steps
 
 * Tune hyperparameters for better mAP and recall.
