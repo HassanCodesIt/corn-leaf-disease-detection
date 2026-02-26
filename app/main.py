@@ -1,5 +1,4 @@
 import io
-import os
 from pathlib import Path
 
 from fastapi import FastAPI, File, UploadFile, HTTPException
@@ -11,6 +10,9 @@ from ultralytics import YOLO
 
 # Get the base directory
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Allowed image types for upload
+ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/jpg", "image/webp"]
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -50,6 +52,27 @@ CLASS_NAMES = {
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
 
 
+def validate_image_type(content_type: str) -> None:
+    """Validate that the uploaded file is an allowed image type."""
+    if content_type not in ALLOWED_IMAGE_TYPES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid file type. Allowed types: {', '.join(ALLOWED_IMAGE_TYPES)}"
+        )
+
+
+async def read_and_process_image(file: UploadFile) -> Image.Image:
+    """Read uploaded file and convert to RGB PIL Image."""
+    contents = await file.read()
+    image = Image.open(io.BytesIO(contents))
+    
+    # Convert to RGB if necessary
+    if image.mode != "RGB":
+        image = image.convert("RGB")
+    
+    return image
+
+
 @app.get("/")
 async def root():
     """Redirect to the static frontend page."""
@@ -74,22 +97,10 @@ async def predict(file: UploadFile = File(...)):
     Returns:
         JSON response with predictions and annotated image
     """
-    # Validate file type
-    allowed_types = ["image/jpeg", "image/png", "image/jpg", "image/webp"]
-    if file.content_type not in allowed_types:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Invalid file type. Allowed types: {', '.join(allowed_types)}"
-        )
+    validate_image_type(file.content_type)
     
     try:
-        # Read and process the image
-        contents = await file.read()
-        image = Image.open(io.BytesIO(contents))
-        
-        # Convert to RGB if necessary
-        if image.mode != "RGB":
-            image = image.convert("RGB")
+        image = await read_and_process_image(file)
         
         # Run prediction
         results = model(image)
@@ -122,6 +133,8 @@ async def predict(file: UploadFile = File(...)):
             "total_detections": len(predictions)
         })
         
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
 
@@ -137,22 +150,10 @@ async def predict_annotated(file: UploadFile = File(...)):
     Returns:
         Annotated image with bounding boxes
     """
-    # Validate file type
-    allowed_types = ["image/jpeg", "image/png", "image/jpg", "image/webp"]
-    if file.content_type not in allowed_types:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Invalid file type. Allowed types: {', '.join(allowed_types)}"
-        )
+    validate_image_type(file.content_type)
     
     try:
-        # Read and process the image
-        contents = await file.read()
-        image = Image.open(io.BytesIO(contents))
-        
-        # Convert to RGB if necessary
-        if image.mode != "RGB":
-            image = image.convert("RGB")
+        image = await read_and_process_image(file)
         
         # Run prediction
         results = model(image)
@@ -172,6 +173,8 @@ async def predict_annotated(file: UploadFile = File(...)):
             headers={"Content-Disposition": "inline; filename=annotated_result.jpg"}
         )
         
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
 
