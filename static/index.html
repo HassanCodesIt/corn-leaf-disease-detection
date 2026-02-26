@@ -19,7 +19,7 @@
         }
 
         .container {
-            max-width: 900px;
+            max-width: 1100px;
             margin: 0 auto;
         }
 
@@ -45,6 +45,47 @@
             border-radius: 20px;
             padding: 40px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        /* Tab navigation */
+        .tab-nav {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 15px;
+        }
+
+        .tab-btn {
+            background: #f0f7f1;
+            color: #2d5a3d;
+            padding: 12px 25px;
+            border: 2px solid transparent;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab-btn:hover {
+            background: #e8f5e9;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #4a7c59 0%, #2d5a3d 100%);
+            color: white;
+            border-color: #2d5a3d;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
         }
 
         .upload-section {
@@ -80,6 +121,23 @@
         .upload-section p {
             color: #666;
             margin-bottom: 20px;
+        }
+
+        .paste-hint {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: #e3f2fd;
+            border-radius: 8px;
+            color: #1976d2;
+            font-size: 0.9rem;
+        }
+
+        .paste-hint kbd {
+            background: #fff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid #90caf9;
+            font-family: monospace;
         }
 
         #fileInput {
@@ -286,26 +344,185 @@
             height: 12px;
             border-radius: 50%;
         }
+
+        /* Webcam styles */
+        .webcam-section {
+            text-align: center;
+        }
+
+        .webcam-container {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        #webcamVideo {
+            width: 100%;
+            max-width: 640px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .webcam-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .btn-secondary {
+            background: #f0f7f1;
+            color: #2d5a3d;
+            padding: 12px 25px;
+            border: 2px solid #4a7c59;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #e8f5e9;
+        }
+
+        .btn-danger {
+            background: #ffebee;
+            color: #c62828;
+            border-color: #c62828;
+        }
+
+        .btn-danger:hover {
+            background: #ffcdd2;
+        }
+
+        .webcam-status {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .webcam-status.active {
+            background: #e8f5e9;
+            color: #2d5a3d;
+        }
+
+        .webcam-status.error {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        /* Live detection overlay */
+        .live-detection-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .live-result-box {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8fdf9;
+            border-radius: 10px;
+        }
+
+        .live-detections {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .live-detection-tag {
+            padding: 8px 15px;
+            background: linear-gradient(135deg, #4a7c59 0%, #2d5a3d 100%);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .live-detection-tag.healthy {
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
             <h1>🌽 Corn Leaf Disease Detection</h1>
-            <p>Upload an image of a corn leaf to detect diseases using AI</p>
+            <p>Upload, paste, or use your webcam to detect corn leaf diseases using AI</p>
         </header>
 
         <div class="main-card">
-            <div class="upload-section" id="dropZone">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/>
-                </svg>
-                <h3>Drop your image here</h3>
-                <p>or click to browse</p>
-                <input type="file" id="fileInput" accept="image/*">
-                <button class="btn" onclick="document.getElementById('fileInput').click()">
-                    Choose Image
+            <!-- Tab Navigation -->
+            <div class="tab-nav">
+                <button class="tab-btn active" data-tab="upload">
+                    📤 Upload Image
                 </button>
+                <button class="tab-btn" data-tab="paste">
+                    📋 Paste Image
+                </button>
+                <button class="tab-btn" data-tab="webcam">
+                    📹 Webcam
+                </button>
+            </div>
+
+            <!-- Upload Tab -->
+            <div class="tab-content active" id="uploadTab">
+                <div class="upload-section" id="dropZone">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/>
+                    </svg>
+                    <h3>Drop your image here</h3>
+                    <p>or click to browse</p>
+                    <input type="file" id="fileInput" accept="image/*">
+                    <button class="btn" onclick="document.getElementById('fileInput').click()">
+                        Choose Image
+                    </button>
+                </div>
+            </div>
+
+            <!-- Paste Tab -->
+            <div class="tab-content" id="pasteTab">
+                <div class="upload-section" id="pasteZone" tabindex="0">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M19 2h-4.18C14.4.84 13.3 0 12 0c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm7 18H5V4h2v3h10V4h2v16z"/>
+                    </svg>
+                    <h3>Paste your image here</h3>
+                    <p>Click this area and press <kbd>Ctrl</kbd>+<kbd>V</kbd> (or <kbd>Cmd</kbd>+<kbd>V</kbd> on Mac)</p>
+                    <div class="paste-hint">
+                        💡 Copy an image from any source and paste it here. Works with screenshots too!
+                    </div>
+                </div>
+            </div>
+
+            <!-- Webcam Tab -->
+            <div class="tab-content" id="webcamTab">
+                <div class="webcam-section">
+                    <div class="webcam-container">
+                        <video id="webcamVideo" autoplay playsinline></video>
+                    </div>
+                    <div class="webcam-controls">
+                        <button class="btn" id="startWebcamBtn">
+                            🎥 Start Webcam
+                        </button>
+                        <button class="btn-secondary" id="captureBtn" disabled>
+                            📸 Capture & Detect
+                        </button>
+                        <button class="btn-secondary" id="liveDetectBtn" disabled>
+                            🔴 Start Live Detection
+                        </button>
+                        <button class="btn-secondary btn-danger" id="stopWebcamBtn" disabled>
+                            ⏹ Stop Webcam
+                        </button>
+                    </div>
+                    <div class="webcam-status" id="webcamStatus"></div>
+                    <!-- Live detection results shown inline -->
+                    <div class="live-result-box" id="liveResultBox" style="display: none;">
+                        <h4>🔍 Live Detections:</h4>
+                        <div class="live-detections" id="liveDetections"></div>
+                    </div>
+                </div>
             </div>
 
             <div class="loader" id="loader">
@@ -373,7 +590,9 @@
     </div>
 
     <script>
+        // DOM Elements
         const dropZone = document.getElementById('dropZone');
+        const pasteZone = document.getElementById('pasteZone');
         const fileInput = document.getElementById('fileInput');
         const loader = document.getElementById('loader');
         const errorMessage = document.getElementById('errorMessage');
@@ -383,6 +602,46 @@
         const resultImage = document.getElementById('resultImage');
         const detectionResults = document.getElementById('detectionResults');
 
+        // Webcam elements
+        const webcamVideo = document.getElementById('webcamVideo');
+        const startWebcamBtn = document.getElementById('startWebcamBtn');
+        const captureBtn = document.getElementById('captureBtn');
+        const liveDetectBtn = document.getElementById('liveDetectBtn');
+        const stopWebcamBtn = document.getElementById('stopWebcamBtn');
+        const webcamStatus = document.getElementById('webcamStatus');
+        const liveResultBox = document.getElementById('liveResultBox');
+        const liveDetections = document.getElementById('liveDetections');
+
+        // Tab elements
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        // Webcam state
+        let webcamStream = null;
+        let liveDetectionInterval = null;
+        let isLiveDetecting = false;
+
+        // Tab switching
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabId = btn.dataset.tab;
+                
+                // Update active states
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                
+                btn.classList.add('active');
+                document.getElementById(`${tabId}Tab`).classList.add('active');
+
+                // Stop webcam if switching away from webcam tab
+                if (tabId !== 'webcam' && webcamStream) {
+                    stopWebcam();
+                }
+            });
+        });
+
+        // ========== UPLOAD FUNCTIONALITY ==========
+        
         // Drag and drop handlers
         dropZone.addEventListener('dragover', (e) => {
             e.preventDefault();
@@ -475,6 +734,290 @@
                 showError(error.message || 'An error occurred while processing the image.');
             }
         }
+
+        // ========== PASTE FUNCTIONALITY ==========
+
+        // Focus paste zone on click
+        pasteZone.addEventListener('click', () => {
+            pasteZone.focus();
+        });
+
+        // Global paste handler
+        document.addEventListener('paste', async (e) => {
+            // Check if we're on the paste tab
+            const pasteTab = document.getElementById('pasteTab');
+            if (!pasteTab.classList.contains('active')) {
+                return; // Only handle paste when paste tab is active
+            }
+
+            const items = e.clipboardData?.items;
+            if (!items) return;
+
+            for (const item of items) {
+                if (item.type.startsWith('image/')) {
+                    e.preventDefault();
+                    const file = item.getAsFile();
+                    if (file) {
+                        await handlePastedImage(file);
+                    }
+                    break;
+                }
+            }
+        });
+
+        async function handlePastedImage(file) {
+            showLoader();
+            hideError();
+
+            try {
+                // Convert file to base64
+                const base64Data = await fileToBase64(file);
+                
+                // Show original image preview
+                originalImage.src = base64Data;
+
+                // Send to base64 endpoint
+                const response = await fetch('/predict/base64', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ image: base64Data })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Prediction failed');
+                }
+
+                const data = await response.json();
+
+                // Display annotated image
+                resultImage.src = data.annotated_image;
+
+                // Display results
+                displayResults(data);
+
+                hideLoader();
+                previewSection.classList.add('active');
+                resultsSection.classList.add('active');
+
+            } catch (error) {
+                hideLoader();
+                showError(error.message || 'An error occurred while processing the pasted image.');
+            }
+        }
+
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // ========== WEBCAM FUNCTIONALITY ==========
+
+        // Start webcam
+        startWebcamBtn.addEventListener('click', async () => {
+            try {
+                webcamStream = await navigator.mediaDevices.getUserMedia({
+                    video: { 
+                        width: { ideal: 640 },
+                        height: { ideal: 480 },
+                        facingMode: 'environment' // Prefer back camera on mobile
+                    }
+                });
+                
+                webcamVideo.srcObject = webcamStream;
+                
+                // Update UI
+                startWebcamBtn.disabled = true;
+                captureBtn.disabled = false;
+                liveDetectBtn.disabled = false;
+                stopWebcamBtn.disabled = false;
+                
+                setWebcamStatus('Webcam is active. Point at a corn leaf and capture or start live detection.', 'active');
+                
+            } catch (error) {
+                setWebcamStatus('Failed to access webcam. Please make sure you have granted camera permissions.', 'error');
+                console.error('Webcam error:', error);
+            }
+        });
+
+        // Capture single frame
+        captureBtn.addEventListener('click', async () => {
+            if (!webcamStream) return;
+            
+            // Stop live detection if running
+            if (isLiveDetecting) {
+                stopLiveDetection();
+            }
+
+            // Capture frame from video
+            const canvas = document.createElement('canvas');
+            canvas.width = webcamVideo.videoWidth;
+            canvas.height = webcamVideo.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(webcamVideo, 0, 0);
+            
+            const base64Data = canvas.toDataURL('image/jpeg', 0.9);
+            
+            // Show original image
+            originalImage.src = base64Data;
+            
+            showLoader();
+            hideError();
+
+            try {
+                const response = await fetch('/predict/base64', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ image: base64Data })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Prediction failed');
+                }
+
+                const data = await response.json();
+
+                // Display annotated image
+                resultImage.src = data.annotated_image;
+
+                // Display results
+                displayResults(data);
+
+                hideLoader();
+                previewSection.classList.add('active');
+                resultsSection.classList.add('active');
+
+            } catch (error) {
+                hideLoader();
+                showError(error.message || 'An error occurred while processing the webcam capture.');
+            }
+        });
+
+        // Live detection toggle
+        liveDetectBtn.addEventListener('click', () => {
+            if (isLiveDetecting) {
+                stopLiveDetection();
+            } else {
+                startLiveDetection();
+            }
+        });
+
+        function startLiveDetection() {
+            isLiveDetecting = true;
+            liveDetectBtn.textContent = '⏸ Stop Live Detection';
+            liveDetectBtn.classList.add('btn-danger');
+            captureBtn.disabled = true;
+            liveResultBox.style.display = 'block';
+            
+            // Hide regular results section during live detection
+            previewSection.classList.remove('active');
+            resultsSection.classList.remove('active');
+            
+            setWebcamStatus('Live detection is running...', 'active');
+
+            // Run detection every 500ms
+            liveDetectionInterval = setInterval(async () => {
+                if (!webcamStream || !isLiveDetecting) return;
+
+                const canvas = document.createElement('canvas');
+                canvas.width = webcamVideo.videoWidth;
+                canvas.height = webcamVideo.videoHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(webcamVideo, 0, 0);
+                
+                const base64Data = canvas.toDataURL('image/jpeg', 0.8);
+
+                try {
+                    const response = await fetch('/predict/base64', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ image: base64Data })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        updateLiveDetections(data.predictions);
+                    }
+                } catch (error) {
+                    console.error('Live detection error:', error);
+                }
+            }, 500);
+        }
+
+        function stopLiveDetection() {
+            isLiveDetecting = false;
+            liveDetectBtn.textContent = '🔴 Start Live Detection';
+            liveDetectBtn.classList.remove('btn-danger');
+            captureBtn.disabled = false;
+            liveResultBox.style.display = 'none';
+            
+            if (liveDetectionInterval) {
+                clearInterval(liveDetectionInterval);
+                liveDetectionInterval = null;
+            }
+            
+            setWebcamStatus('Webcam is active. Point at a corn leaf and capture or start live detection.', 'active');
+        }
+
+        function updateLiveDetections(predictions) {
+            liveDetections.innerHTML = '';
+            
+            if (predictions.length === 0) {
+                liveDetections.innerHTML = '<span style="color: #666;">No detections in current frame</span>';
+                return;
+            }
+
+            predictions.forEach(pred => {
+                const tag = document.createElement('span');
+                tag.className = `live-detection-tag ${pred.class_name === 'Healthy' ? 'healthy' : ''}`;
+                tag.textContent = `${pred.class_name} (${(pred.confidence * 100).toFixed(1)}%)`;
+                liveDetections.appendChild(tag);
+            });
+        }
+
+        // Stop webcam
+        stopWebcamBtn.addEventListener('click', stopWebcam);
+
+        function stopWebcam() {
+            if (webcamStream) {
+                webcamStream.getTracks().forEach(track => track.stop());
+                webcamStream = null;
+                webcamVideo.srcObject = null;
+            }
+            
+            if (isLiveDetecting) {
+                stopLiveDetection();
+            }
+            
+            // Update UI
+            startWebcamBtn.disabled = false;
+            captureBtn.disabled = true;
+            liveDetectBtn.disabled = true;
+            stopWebcamBtn.disabled = true;
+            
+            setWebcamStatus('', '');
+        }
+
+        function setWebcamStatus(message, type) {
+            webcamStatus.textContent = message;
+            webcamStatus.className = 'webcam-status';
+            if (type) {
+                webcamStatus.classList.add(type);
+            }
+        }
+
+        // ========== SHARED FUNCTIONS ==========
 
         // Display detection results
         function displayResults(data) {

@@ -1,11 +1,13 @@
 import io
 import os
+import base64
 from pathlib import Path
 
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 from PIL import Image
 from ultralytics import YOLO
 
@@ -48,6 +50,12 @@ CLASS_NAMES = {
     5: "Healthy",
     6: "Leaf Blight"
 }
+
+
+# Pydantic model for base64 image input
+class Base64ImageRequest(BaseModel):
+    image: str  # Base64 encoded image data
+
 
 # Mount static files
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
@@ -176,6 +184,83 @@ async def predict_annotated(file: UploadFile = File(...)):
         
     except HTTPException:
         raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
+
+
+def process_base64_image(base64_str: str) -> Image.Image:
+    """Process base64 encoded image data and return PIL Image."""
+    # Remove data URL prefix if present (e.g., "data:image/jpeg;base64,")
+    if "," in base64_str:
+        base64_str = base64_str.split(",", 1)[1]
+    
+    # Decode base64 to bytes
+    image_bytes = base64.b64decode(base64_str)
+    image = Image.open(io.BytesIO(image_bytes))
+    
+    # Convert to RGB if necessary
+    if image.mode != "RGB":
+        image = image.convert("RGB")
+    
+    return image
+
+
+@app.post("/predict/base64")
+async def predict_base64(request: Base64ImageRequest):
+    """
+    Predict corn leaf disease from a base64 encoded image.
+    Used for webcam frames and pasted images.
+    
+    Args:
+        request: JSON body with base64 encoded image
+        
+    Returns:
+        JSON response with predictions and base64 annotated image
+    """
+    try:
+        image = process_base64_image(request.image)
+        
+        # Run prediction
+        results = model(image)
+        
+        # Extract predictions
+        predictions = []
+        for result in results:
+            boxes = result.boxes
+            for box in boxes:
+                cls_id = int(box.cls[0])
+                confidence = float(box.conf[0])
+                bbox = box.xyxy[0].tolist()
+                
+                predictions.append({
+                    "class_id": cls_id,
+                    "class_name": CLASS_NAMES.get(cls_id, "Unknown"),
+                    "confidence": round(confidence, 4),
+                    "bbox": {
+                        "x1": round(bbox[0], 2),
+                        "y1": round(bbox[1], 2),
+                        "x2": round(bbox[2], 2),
+                        "y2": round(bbox[3], 2)
+                    }
+                })
+        
+        # Get annotated image
+        annotated_frame = results[0].plot()
+        
+        # Convert to PIL Image and then to base64
+        annotated_image = Image.fromarray(annotated_frame)
+        img_byte_arr = io.BytesIO()
+        annotated_image.save(img_byte_arr, format="JPEG", quality=95)
+        img_byte_arr.seek(0)
+        annotated_base64 = base64.b64encode(img_byte_arr.getvalue()).decode("utf-8")
+        
+        return JSONResponse(content={
+            "success": True,
+            "predictions": predictions,
+            "total_detections": len(predictions),
+            "annotated_image": f"data:image/jpeg;base64,{annotated_base64}"
+        })
+        
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
 
