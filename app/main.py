@@ -194,9 +194,21 @@ def process_base64_image(base64_str: str) -> Image.Image:
     if "," in base64_str:
         base64_str = base64_str.split(",", 1)[1]
     
-    # Decode base64 to bytes
-    image_bytes = base64.b64decode(base64_str)
-    image = Image.open(io.BytesIO(image_bytes))
+    # Validate base64 string length (max ~10MB decoded, which is ~13.3MB base64)
+    max_base64_length = 14_000_000  # ~10MB image limit
+    if len(base64_str) > max_base64_length:
+        raise HTTPException(status_code=400, detail="Image too large. Maximum size is 10MB.")
+    
+    try:
+        # Decode base64 to bytes
+        image_bytes = base64.b64decode(base64_str)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid base64 image data.")
+    
+    try:
+        image = Image.open(io.BytesIO(image_bytes))
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid image format.")
     
     # Convert to RGB if necessary
     if image.mode != "RGB":
@@ -261,6 +273,8 @@ async def predict_base64(request: Base64ImageRequest):
             "annotated_image": f"data:image/jpeg;base64,{annotated_base64}"
         })
         
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
 

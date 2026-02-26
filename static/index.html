@@ -825,8 +825,9 @@
                 webcamStream = await navigator.mediaDevices.getUserMedia({
                     video: { 
                         width: { ideal: 640 },
-                        height: { ideal: 480 },
-                        facingMode: 'environment' // Prefer back camera on mobile
+                        height: { ideal: 480 }
+                        // Note: facingMode not specified to use default camera
+                        // which is typically front-facing on desktop, back camera on mobile
                     }
                 });
                 
@@ -924,9 +925,12 @@
             
             setWebcamStatus('Live detection is running...', 'active');
 
-            // Run detection every 500ms
+            // Track if a request is in progress to prevent overlapping requests
+            let isRequestPending = false;
+
+            // Run detection every 1000ms (1 second) to avoid overwhelming the server
             liveDetectionInterval = setInterval(async () => {
-                if (!webcamStream || !isLiveDetecting) return;
+                if (!webcamStream || !isLiveDetecting || isRequestPending) return;
 
                 const canvas = document.createElement('canvas');
                 canvas.width = webcamVideo.videoWidth;
@@ -934,8 +938,9 @@
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(webcamVideo, 0, 0);
                 
-                const base64Data = canvas.toDataURL('image/jpeg', 0.8);
+                const base64Data = canvas.toDataURL('image/jpeg', 0.9);
 
+                isRequestPending = true;
                 try {
                     const response = await fetch('/predict/base64', {
                         method: 'POST',
@@ -951,8 +956,10 @@
                     }
                 } catch (error) {
                     console.error('Live detection error:', error);
+                } finally {
+                    isRequestPending = false;
                 }
-            }, 500);
+            }, 1000);
         }
 
         function stopLiveDetection() {
